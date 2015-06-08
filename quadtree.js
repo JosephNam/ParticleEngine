@@ -17,17 +17,24 @@
         this.bounds = bounds;
 
         this.nodes = [];
-
+        var size;
         this.parent_node = parent_node || null;
     };
 
     
+    Quadtree.prototype.add(x,y) {
+        if (size + 1 > this.max_objects){
+            split();
+        }
+        var node = new Node(x,y);
+
+    }
     Quadtree.prototype.split = function() {
         var newLevel = this.level + 1,
             newWidth = Math.round( this.bounds.width / 2),
             newHeight = Math.round( this.bounds.height / 2),
-            x = Math.round( this.bounds.x),
-            y = Math.round( this.bounds.y);
+            x = this.bounds.x;
+            y = this.bounds.y;
     }
 
 })
