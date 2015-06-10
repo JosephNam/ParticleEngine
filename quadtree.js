@@ -1,4 +1,5 @@
-/*
+// may be easier to implement with ending x and ending y instead of widht / height math may be easier
+/* child diagram
  *            --------------------
  *            |   1    |   2     |
  *            |        |         |
@@ -7,14 +8,8 @@
  *            |        |         |
  *            ---------|---------|
  *
- *
- *
- *
- *
- *
- *
- *
  */
+    //node constructor
 function Node(x,y,width,height){
     this.x = x;
     this.y = y;
@@ -57,6 +52,7 @@ Node.prototype.split = function(){
 Node.prototype.updateHeight = function() {
 //TODO
 }
+//remember need to give quadtree x and y beginning point.
 function Quadtree(width,height){
     this.width = width;
     this.height = height;
