@@ -1,3 +1,20 @@
+/*
+ *            --------------------
+ *            |   1    |   2     |
+ *            |        |         |
+ *            |------------------| 
+ *            |   3    |  4      |
+ *            |        |         |
+ *            ---------|---------|
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ */
 function Node(x,y,width,height){
     this.x = x;
     this.y = y;
@@ -11,6 +28,23 @@ function Node(x,y,width,height){
     this.child4;
     this.height;
     this.depth;
+}
+
+
+Node.prototype.findChild(objectx,objecty,objectw,objecth){
+    if (objectx < this.width/2){
+        if (objecty < this.height/2){
+            return child1;
+        } else {
+            return child3;
+        }
+    } else {
+        if (objecty < this.height/2){
+            return child2;
+        } else {
+            return child4;
+        }
+    }
 }
 
 
@@ -39,29 +73,20 @@ Quadtree.prototype.insert(object){
     var cn = this.root;
     while(!(cn.child1 == null|| cn.child2 == null|| cn.child3== null || cn.child4 == null)){
         if (cn.height == 0){
-        if ((objectx - objectw) >= cn.x){
-            if((objectx+objectw) <= (cn.x+cn.width)){
-                if((objecty - objecth) >= cn.y){
-                    if((objecty+objecth)<=(cn.y+ cn.height)){
-                        if (cn.objects.length < 2){
-                            cn.objects.push(object);
-                        }
-                    }
-                }
-            }
-        } 
-        } else {
             if ((objectx - objectw) >= cn.x){
                 if((objectx+objectw) <= (cn.x+cn.width)){
                     if((objecty - objecth) >= cn.y){
                         if((objecty+objecth)<=(cn.y+ cn.height)){
                             if (cn.objects.length < 2){
-                                
+                                cn.objects.push(object);
+                                break;
                             }
                         }
                     }
                 }
-            }    
+            } 
+        } else {
+           cn = cn.findChild(objectx,objecty,objectw,objecth);
         }
     }
 }
