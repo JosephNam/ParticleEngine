@@ -22,16 +22,16 @@ function Node(x,y,width,height){
     this.height = height;
     this.hash = 0;
     this.objects = [];
-    this.child1;
-    this.child2;
-    this.child3;
-    this.child4;
+    this.child1 = null;
+    this.child2 = null;
+    this.child3 = null;
+    this.child4 = null;
     this.height;
     this.depth;
 }
 
 
-Node.prototype.findChild(objectx,objecty,objectw,objecth){
+Node.prototype.findChild = function(objectx, objecty, objectw, objecth){
     if (objectx < this.width/2){
         if (objecty < this.height/2){
             return child1;
@@ -47,7 +47,16 @@ Node.prototype.findChild(objectx,objecty,objectw,objecth){
     }
 }
 
-
+Node.prototype.split = function(){
+    child1 = new Node(x,y,width/2,height/2);
+    child2 = new Node(x+width/2,y,width/2,height/2);
+    child3 = new Node(x,y+height/2,width/2,height/2);
+    child4 = new Node(x+width/2,y+height/2,width/2,height/2);
+    height = this.updateHeight();
+}
+Node.prototype.updateHeight = function() {
+//TODO
+}
 function Quadtree(width,height){
     this.width = width;
     this.height = height;
@@ -60,7 +69,7 @@ function Quadtree(width,height){
     root.child4 = new Node(width/2,height/2,width/2,height/2);
 }
 
-Quadtree.prototype.insert(object){
+Quadtree.prototype.insert= function(object){
     var objectx,
         objecty,
         objectw,
@@ -80,6 +89,8 @@ Quadtree.prototype.insert(object){
                             if (cn.objects.length < 2){
                                 cn.objects.push(object);
                                 break;
+                            } else {
+                                cn.split(); 
                             }
                         }
                     }
