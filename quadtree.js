@@ -15,14 +15,15 @@ function Node(x,y,width,height){
     this.y = y;
     this.width = width;
     this.height = height;
-    this.hash = 0;
-    this.objects = [];
-    this.child1 = null;
-    this.child2 = null;
-    this.child3 = null;
-    this.child4 = null;
-    this.height;
-    this.depth;
+    var hash = 0;
+    var objects = [];
+    var parent = null;
+    var child1 = null;
+    var child2 = null;
+    var child3 = null;
+    var child4 = null;
+    var height;
+    var depth;
 }
 
 
@@ -43,14 +44,21 @@ Node.prototype.findChild = function(objectx, objecty, objectw, objecth){
 }
 
 Node.prototype.split = function(){
-    child1 = new Node(x,y,width/2,height/2);
-    child2 = new Node(x+width/2,y,width/2,height/2);
-    child3 = new Node(x,y+height/2,width/2,height/2);
-    child4 = new Node(x+width/2,y+height/2,width/2,height/2);
-    height = this.updateHeight();
+    this.child1 = new Node(this.x,this.y,this.width/2,this.height/2);
+    this.child2 = new Node(this.x+this.width/2,this.y,this.width/2,this.height/2);
+    this.child3 = new Node(this.x,this.y+this.height/2,this.width/2,this.height/2);
+    this.child4 = new Node(this.x+this.width/2,this.y+this.height/2,this.width/2,this.height/2);
+    this.child1.parent=this;
+    this.child2.parent=this;
+    this.child3.parent=this;
+    this.child4.parent=this;
 }
-Node.prototype.updateHeight = function() {
-//TODO
+Node.prototype.isLeaf= function() {
+    if(this.child1 == null && child2 == null && child3 == null && child4 ==null){
+        return true;
+    } else {
+        return false;
+    }
 }
 //remember need to give quadtree x and y beginning point.
 function Quadtree(width,height){
@@ -58,13 +66,9 @@ function Quadtree(width,height){
     this.height = height;
     this.MAX_LEVELS = 4;
     this.MAX_OBJ = 2;
-    this.root = new Node(0,0,width,height);
-    root.child1 = new Node(0,0,width/2,height/2); 
-    root.child2 = new Node(width/2,0,width/2,height/2);
-    root.child3 = new Node(0,height/2,width/2,height/2);
-    root.child4 = new Node(width/2,height/2,width/2,height/2);
+    var root = new Node(0,0,width,height);
+    root.split();
 }
-
 Quadtree.prototype.insert= function(object){
     var objectx,
         objecty,
@@ -76,8 +80,10 @@ Quadtree.prototype.insert= function(object){
     objecth = object.height;
     //cn = current node
     var cn = this.root;
-    while(!(cn.child1 == null|| cn.child2 == null|| cn.child3== null || cn.child4 == null)){
-        if (cn.height == 0){
+    if(cn == undefined)
+    while(cn && (cn.child1 || cn.child2 || cn.child3 || cn.child4)){
+        //check if empty node is a match for new object
+        if (cn.isLeaf() == true){
             if ((objectx - objectw) >= cn.x){
                 if((objectx+objectw) <= (cn.x+cn.width)){
                     if((objecty - objecth) >= cn.y){
@@ -92,8 +98,18 @@ Quadtree.prototype.insert= function(object){
                     }
                 }
             } 
-        } else {
-           cn = cn.findChild(objectx,objecty,objectw,objecth);
-        }
+        } 
+        cn = cn.findChild(objectx,objecty,objectw,objecth);
     }
 }
+
+function Circle(x,y,r) {
+    this.x = x;
+    this.y = y;
+    this.width=r;
+    this.height=r;
+}
+
+var tree = new Quadtree(600,600);
+tree.insert(new Circle(200,200,10));
+    
