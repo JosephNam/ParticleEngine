@@ -37,19 +37,30 @@ window.addEventListener("keyup", function(event)
 
 var particleList = [];
 var NUM_PARTICLES = 50;
-var MAX_PARTICLES = 2000;
+var COUNT_PARTICLES = 0;
+var MAX_PARTICLES = 2500;
 var emitterOne = new Emitter(250, 250);
-var field1 = new GravityField(300, 300);
+var emitterList = [];
+emitterList.push(emitterOne);
+emitterList.push(new Emitter(100, 100));
+var field1 = new GravityField(300, 300, 200);
+//var field2 = new GravityField(150, 300, -10);
 var fieldsList = []
 fieldsList.push(field1);
-setInterval(function() {emitterOne.spawnParticles(NUM_PARTICLES)}, 100);
-
+//fieldsList.push(field2);
+setInterval(function() {
+	for (var i = 0; i < emitterList.length; i++) {
+		emitterList[i].spawnParticles(NUM_PARTICLES);
+	}
+	//emitterOne.spawnParticles(NUM_PARTICLES)}, 100);
+}, 100);
 var update = function() {
     for (var i = 0; i < particleList.length; i++) {
         for ( var j  = 0; j < particleList[i].length; j++) {
             particleList[i][j].update();
-            if(particleList[i][j].x > CANVAS_WIDTH || particleList[i][j].y > CANVAS_HEIGHT) {
+            if(particleList[i][j].x > CANVAS_WIDTH || particleList[i][j].y > CANVAS_HEIGHT || particleList[i][j].x < 0 || particleList[i][j].y < 0) {
                 particleList[i].splice(j, 1);
+				COUNT_PARTICLES--;
             }
         }
         if (particleList[i].length == 0) {
@@ -62,6 +73,12 @@ var update = function() {
 var render = function() {
     context.fillStyle = "#000000";
     context.fillRect(0,0,CANVAS_WIDTH,CANVAS_HEIGHT);
+	for (var i = 0; i < emitterList.length; i++) {
+		emitterList[i].render();
+	}
+	for (var i = 0; i < fieldsList.length; i++) {
+		fieldsList[i].render();
+	}
     for (var i = 0; i < particleList.length; i++) {
         for ( var j  = 0; j < particleList[i].length; j++) {
             particleList[i][j].render();
@@ -131,6 +148,9 @@ Emitter.prototype.render = function () {
 };
 
 Emitter.prototype.spawnParticles = function () {
+	if (COUNT_PARTICLES >= MAX_PARTICLES) {
+		return;
+	}
     var tempParticles = [];
 	for (var i = 0; i <= this.spread; i+= 0.25) {
 		var xVar = Math.random() * (Math.cos(i+1) - Math.cos(i) ) + Math.cos(i+1);
@@ -141,6 +161,7 @@ Emitter.prototype.spawnParticles = function () {
 		tempParticles.push(newParticle);
 	}
     particleList.push(tempParticles);
+	COUNT_PARTICLES += tempParticles.length;
 };
 
 
@@ -150,4 +171,24 @@ function GravityField(x, y, mass) {
 	this.mass = mass || 200;
 }
 
+GravityField.prototype.render = function() {
+	var color = this.mass/100;
+	var fillColor = "#000000";
+	if (color > 0) {
+		fillColor = "#ff0000";
+	} else {
+		fillColor = "#0000ff";
+	}	
+    context.beginPath();
+    context.arc(this.x, this.y, 1, 0, 2 * Math.PI, false);
+    context.fillStyle = fillColor;
+    context.fill();
+	context.closePath();
 
+	context.beginPath();
+	context.arc(this.x, this.y, Math.abs(this.mass), 0, 2*Math.PI, true);
+	context.strokeStyle = fillColor;
+	context.stroke();
+	context.closePath();
+
+}
