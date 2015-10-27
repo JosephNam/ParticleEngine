@@ -1,7 +1,7 @@
 //Author: Joseph Nam
 //Interactive Musical Particle Generator
-var animate = window.requestAnimationFrame ||
 
+var animate = window.requestAnimationFrame ||
 window.webkitRequestAnimationFrame ||
 window.mozRequestAnimationFrame ||
 function(callback) {window.setTimeout(callback, 1000/60)};
@@ -38,22 +38,26 @@ window.addEventListener("keyup", function(event)
 var particleList = [];
 var NUM_PARTICLES = 50;
 var COUNT_PARTICLES = 0;
-var MAX_PARTICLES = 10000;
-var emitterOne = new Emitter(150, 150, 0, 0.35);
+var MAX_PARTICLES = 2000;
+var emitterOne = new Emitter(300, 500, 0, 2);
 var emitterList = [];
 emitterList.push(emitterOne);
-var field1 = new GravityField(300, 300, 300);
-var field2 = new GravityField(150, 300, 100);
-var field3 = new GravityField(450, 150, 100);
+var field1 = new GravityField(350, 500, -50);
 var fieldsList = []
+fieldsList.push(new GravityField(300, 500, 150));
+fieldsList.push(new GravityField(300, 550, -50));
+fieldsList.push(new GravityField(325, 475, -50));
+fieldsList.push(new GravityField(325, 525, -50));
+fieldsList.push(new GravityField(300, 450, -50));
+fieldsList.push(new GravityField(275, 475, -50));
+fieldsList.push(new GravityField(275, 525, -50));
+fieldsList.push(new GravityField(250, 500, -50));
 fieldsList.push(field1);
-fieldsList.push(field2);
-fieldsList.push(field3);
 setInterval(function() {
 	for (var i = 0; i < emitterList.length; i++) {
 		emitterList[i].spawnParticles(NUM_PARTICLES);
 	}
-}, 100);
+}, 25);
 var update = function() {
     for (var i = 0; i < particleList.length; i++) {
         for ( var j  = 0; j < particleList[i].length; j++) {
@@ -103,12 +107,12 @@ function Particle(x, y, r, color, endcolor, life, drift)
     this.r = r || .5;
     this.xv = 1;
     this.yv = 1;
-    this.color = color || "#ff00ff";
-	this.life = life || 800;
+    this.color = color || "#ffffff";
+	this.life = life || 10000000;
 	this.age = 0;
 	//0 - 1 i  think
 	this.drift = drift || 0.00;
-	this.endcolor = endcolor || "#ff00ff";
+	this.endcolor = endcolor || "#ffffff";
 }
 
 Particle.prototype.update = function()
@@ -127,16 +131,18 @@ Particle.prototype.render = function()
 	var transparency = ((this.life - this.age ) / this.life) - 0.25;
 	var strTransparency = transparency.toString();
 	
-    context.fillStyle = "rgba(255, 0, 255," + strTransparency+  " )"; 
+    context.fillStyle = "rgba(255, 255, 255," + strTransparency+  " )"; 
     context.fill();
 }
 
 Particle.prototype.field = function(fields) 
 {
+	
 	for (var i = 0; i < fields.length; i++) {
 		var field = fields[i];
 		var vectorX = field.x - this.x;
 		var vectorY = field.y - this.y;
+		//.5 for overall force makes very interesting behavior
 		var force = field.mass/ (Math.pow(Math.pow(vectorX, 2) + Math.pow(vectorY, 2), 1.5)+ 125);
 		this.xv += vectorX*force;
 		this.yv += vectorY*force;
@@ -173,22 +179,6 @@ Emitter.prototype.spawnParticles = function () {
 		return;
 	}
     var tempParticles = [];
-	/*
-	var count = this.startspread;
-	while (count !== this.endspread) {
-		if (count >= 2) {
-			count = 0;
-		}
-		console.log(count);
-		var xVar = Math.random() * (Math.cos(count+this.thickness) - Math.cos(count) ) + Math.cos(count+this.thickness);
-		var yVar = Math.random() * (Math.sin(count+this.thickness) - Math.sin(count) ) + Math.sin(count+this.thickness);
-		var newParticle = new Particle(this.x + xVar, this.y + yVar);
-		newParticle.xv = (newParticle.xv*Math.cos(count));
-		newParticle.yv = (newParticle.yv*Math.sin(count));
-		tempParticles.push(newParticle);
-		count+=this.thickness;
-	}
-	*/
 	if (this.startspread < this.endspread) {
 		for (var i = this.startspread; i < this.endspread; i+= this.thickness * Math.PI) {
 			var xVar = Math.random() * (Math.cos(i+1) - Math.cos(i) ) + Math.cos(i+1);
@@ -226,7 +216,7 @@ function GravityField(x, y, mass) {
 GravityField.prototype.render = function() {
 	var color = this.mass/100;
 	var fillColor = "#000000";
-	if (color > 0) {
+	if (color < 0) {
 		fillColor = "rgba(255, 0, 0, 0.5)";
 	} else {
 		fillColor = "rgba(0, 0, 255, 0.5)";
