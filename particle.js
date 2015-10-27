@@ -39,19 +39,19 @@ var particleList = [];
 var NUM_PARTICLES = 50;
 var COUNT_PARTICLES = 0;
 var MAX_PARTICLES = 10000;
-var emitterOne = new Emitter(500, 250, 1, 1.25);
+var emitterOne = new Emitter(150, 150, 0, 0.35);
 var emitterList = [];
 emitterList.push(emitterOne);
-var field1 = new GravityField(300, 300, 1000);
-//var field2 = new GravityField(150, 300, -10);
+var field1 = new GravityField(300, 300, 300);
+var field2 = new GravityField(150, 300, -100);
 var fieldsList = []
 fieldsList.push(field1);
-//fieldsList.push(field2);
+fieldsList.push(field2);
 setInterval(function() {
 	for (var i = 0; i < emitterList.length; i++) {
 		emitterList[i].spawnParticles(NUM_PARTICLES);
 	}
-}, 25);
+}, 100);
 var update = function() {
     for (var i = 0; i < particleList.length; i++) {
         for ( var j  = 0; j < particleList[i].length; j++) {
@@ -94,18 +94,19 @@ var render = function() {
 }
 
 
-function Particle(x, y, r, color, life, drift)
+function Particle(x, y, r, color, endcolor, life, drift)
 {
     this.x = x || 300;
     this.y = y || 300;
     this.r = r || .5;
-    this.xv = 2;
-    this.yv = 2;
+    this.xv = 1;
+    this.yv = 1;
     this.color = color || "#ff00ff";
-	this.life = life || 100000;
+	this.life = life || 800;
 	this.age = 0;
 	//0 - 1 i  think
 	this.drift = drift || 0.00;
+	this.endcolor = endcolor || "#ff00ff";
 }
 
 Particle.prototype.update = function()
@@ -113,7 +114,6 @@ Particle.prototype.update = function()
 	var negativeDrift = 0 - this.drift;
     this.x += this.xv + Math.random()/3 - Math.random()/3; 
     this.y += this.yv + Math.random()/3 - Math.random()/3;
-
 	this.age++;
 	this.field(fieldsList);
 }
@@ -122,8 +122,9 @@ Particle.prototype.render = function()
 {
     context.beginPath();
     context.arc(this.x, this.y, this.r, 2 * Math.PI, false);
-	var transparency = ((this.life - this.age ) / this.life) - 0.1;
+	var transparency = ((this.life - this.age ) / this.life) - 0.25;
 	var strTransparency = transparency.toString();
+	
     context.fillStyle = "rgba(255, 0, 255," + strTransparency+  " )"; 
     context.fill();
 }
@@ -134,7 +135,7 @@ Particle.prototype.field = function(fields)
 		var field = fields[i];
 		var vectorX = field.x - this.x;
 		var vectorY = field.y - this.y;
-		var force = field.mass / Math.pow(Math.pow(vectorX, 2) + Math.pow(vectorY, 2), 1.5);
+		var force = field.mass/ (Math.pow(Math.pow(vectorX, 2) + Math.pow(vectorY, 2), 1.5)+ 125);
 		this.xv += vectorX*force;
 		this.yv += vectorY*force;
 	}
@@ -170,15 +171,45 @@ Emitter.prototype.spawnParticles = function () {
 		return;
 	}
     var tempParticles = [];
-	for (var i = this.startspread; i < this.endspread; i+= this.thickness * Math.PI) {
-		var xVar = Math.random() * (Math.cos(i+1) - Math.cos(i) ) + Math.cos(i+1);
-		var yVar = Math.random() * (Math.sin(i+1) - Math.sin(i) ) + Math.sin(i+1);
+	/*
+	var count = this.startspread;
+	while (count !== this.endspread) {
+		if (count >= 2) {
+			count = 0;
+		}
+		console.log(count);
+		var xVar = Math.random() * (Math.cos(count+this.thickness) - Math.cos(count) ) + Math.cos(count+this.thickness);
+		var yVar = Math.random() * (Math.sin(count+this.thickness) - Math.sin(count) ) + Math.sin(count+this.thickness);
 		var newParticle = new Particle(this.x + xVar, this.y + yVar);
-		newParticle.xv = (newParticle.xv*Math.cos(i));
-		newParticle.yv = (newParticle.yv*Math.sin(i));
-
+		newParticle.xv = (newParticle.xv*Math.cos(count));
+		newParticle.yv = (newParticle.yv*Math.sin(count));
 		tempParticles.push(newParticle);
+		count+=this.thickness;
 	}
+	*/
+	if (this.startspread < this.endspread) {
+		for (var i = this.startspread; i < this.endspread; i+= this.thickness * Math.PI) {
+			var xVar = Math.random() * (Math.cos(i+1) - Math.cos(i) ) + Math.cos(i+1);
+			var yVar = Math.random() * (Math.sin(i+1) - Math.sin(i) ) + Math.sin(i+1);
+			var newParticle = new Particle(this.x + xVar, this.y + yVar);
+			newParticle.xv = (newParticle.xv*Math.cos(i));
+			newParticle.yv = (newParticle.yv*Math.sin(i));
+
+			tempParticles.push(newParticle);
+		}
+	} else {
+		
+		for (var i = this.startspread; i < this.startspread + this.endspread; i+= this.thickness * Math.PI) {
+			var xVar = Math.random() * (Math.cos(i+1) - Math.cos(i) ) + Math.cos(i+1);
+			var yVar = Math.random() * (Math.sin(i+1) - Math.sin(i) ) + Math.sin(i+1);
+			var newParticle = new Particle(this.x + xVar, this.y + yVar);
+			newParticle.xv = (newParticle.xv*Math.cos(i));
+			newParticle.yv = (newParticle.yv*Math.sin(i));
+
+			tempParticles.push(newParticle);
+		}
+	}
+	
     particleList.push(tempParticles);
 	COUNT_PARTICLES += tempParticles.length;
 };
