@@ -35,8 +35,13 @@ window.addEventListener("keyup", function(event)
     delete keysDown[event.keyCode];
 });
 
-var emitterOne = new Emitter(500, 500);
-
+var particleList = [];
+var NUM_PARTICLES = 50;
+var MAX_PARTICLES = 2000;
+var emitterOne = new Emitter(250, 250);
+var field1 = new GravityField(300, 300);
+var fieldsList = []
+fieldsList.push(field1);
 setInterval(function() {emitterOne.spawnParticles(NUM_PARTICLES)}, 100);
 
 var update = function() {
@@ -51,7 +56,6 @@ var update = function() {
             particleList.splice(i, 1);
             console.log("removed empty array");
         }
-
     }
 }
 
@@ -73,12 +77,14 @@ function Particle(x, y, r, color)
     this.xv = 2;
     this.yv = 2;
     this.color = color | "#ff00ff";
+	this.life = 3;
 }
 
 Particle.prototype.update = function()
 {
     this.x += this.xv;
     this.y += this.yv;
+	this.field(fieldsList);
 }
 
 Particle.prototype.render = function()
@@ -89,14 +95,27 @@ Particle.prototype.render = function()
     context.fill();
 }
 
-var particleList = [];
-var NUM_PARTICLES = 50;
-var MAX_PARTICLES = 2000;
+Particle.prototype.field = function(fields) 
+{
+	for (var i = 0; i < fields.length; i++) {
+		var field = fields[i];
+		var vectorX = field.x - this.x;
+		var vectorY = field.y - this.y;
+		var force = field.mass / Math.pow(Math.pow(vectorX, 2) + Math.pow(vectorY, 2), 1.5);
+		this.xv += vectorX*force;
+		this.yv += vectorY*force;
+	}
+}
 
+
+/**
+ * spread is a value from 0 to 2 in pi radians
+ */
 function Emitter(x, y, spread, speed) {
     this.x = x;
     this.y = y;
-    this.spread = spread | Math.PI / 32;
+    this.spread = spread  * Math.PI | Math.PI * 2;
+
     this.speed = speed | 1;
 }
 
@@ -111,39 +130,24 @@ Emitter.prototype.render = function () {
     context.fill();
 };
 
-Emitter.prototype.spawnParticles = function (NUM_PARTICLES) {
+Emitter.prototype.spawnParticles = function () {
     var tempParticles = [];
-    for (var index = 0; index < NUM_PARTICLES; index++) {
-        var tempParticle = new Particle(this.x, this.y);
-        var xvariance = index / NUM_PARTICLES;
-        var yvariance = index / NUM_PARTICLES;
-        //have to figure out max number of particles u can fit in one spot
-        if (xvariance < .125) {
-            tempParticle.xv = -1 + xvariance*-5;
-            tempParticle.yv = -1 + yvariance*-1;
-        } else if (xvariance < .25){
-            tempParticle.xv = 0 + xvariance;
-            tempParticle.yv = - 1+ yvariance*-1;
-        } else if (xvariance < .375) {
-            tempParticle.xv = 1 + xvariance;
-            tempParticle.yv = -1+ yvariance*-1;
-        } else if (xvariance < .5) {
-            tempParticle.xv = 1 + xvariance;
-            tempParticle.yv = 0 + yvariance;
-        } else if (xvariance < .625) {
-            tempParticle.xv = 1 + xvariance;
-            tempParticle.yv = 1 + yvariance;
-        } else if (xvariance < .75) {
-            tempParticle.xv = 0 + xvariance;
-            tempParticle.yv = 1 + yvariance;
-        } else if (xvariance < .875) {
-            tempParticle.xv = -1 + xvariance*-1;
-            tempParticle.yv = 1 + yvariance;
-        } else if (xvariance < 1) {
-            tempParticle.xv = -1 + xvariance*-1;
-            tempParticle.yv = 0 + yvariance;
-        }
-        tempParticles.push(tempParticle);
-    }
+	for (var i = 0; i <= this.spread; i+= 0.25) {
+		var xVar = Math.random() * (Math.cos(i+1) - Math.cos(i) ) + Math.cos(i+1);
+		var yVar = Math.random() * (Math.sin(i+1) - Math.sin(i) ) + Math.sin(i+1);
+		var newParticle = new Particle(this.x + xVar, this.y + yVar);
+		newParticle.xv = Math.abs(newParticle.xv*Math.cos(i));
+		newParticle.yv = Math.abs(newParticle.yv*Math.sin(i));
+		tempParticles.push(newParticle);
+	}
     particleList.push(tempParticles);
 };
+
+
+function GravityField(x, y, mass) {
+	this.x = x;
+	this.y = y;
+	this.mass = mass || 200;
+}
+
+
