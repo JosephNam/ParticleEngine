@@ -43,10 +43,12 @@ var emitterOne = new Emitter(150, 150, 0, 0.35);
 var emitterList = [];
 emitterList.push(emitterOne);
 var field1 = new GravityField(300, 300, 300);
-var field2 = new GravityField(150, 300, -100);
+var field2 = new GravityField(150, 300, 100);
+var field3 = new GravityField(450, 150, 100);
 var fieldsList = []
 fieldsList.push(field1);
 fieldsList.push(field2);
+fieldsList.push(field3);
 setInterval(function() {
 	for (var i = 0; i < emitterList.length; i++) {
 		emitterList[i].spawnParticles(NUM_PARTICLES);

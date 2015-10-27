@@ -1,3 +1,3 @@
 # JSBPE
 
-Javascript SandBox Physics Engine
+Javascript SandBox Particle Engine
