@@ -38,24 +38,24 @@ window.addEventListener("keyup", function(event)
 var particleList = [];
 var NUM_PARTICLES = 50;
 var COUNT_PARTICLES = 0;
-var MAX_PARTICLES = 10000;
-var emitterOne = new Emitter(250, 250);
+var MAX_PARTICLES = 25000;
+var emitterOne = new Emitter(500, 250);
 var emitterList = [];
 emitterList.push(emitterOne);
-emitterList.push(new Emitter(100, 100));
 var field1 = new GravityField(300, 300, 200);
-var field2 = new GravityField(150,150,200);
+var field2 = new GravityField(150,150 ,200);
+var field3 = new GravityField(225, 225, 200);
 //var field2 = new GravityField(150, 300, -10);
 var fieldsList = []
 fieldsList.push(field1);
 fieldsList.push(field2);
+fieldsList.push(field3);
 //fieldsList.push(field2);
 setInterval(function() {
 	for (var i = 0; i < emitterList.length; i++) {
 		emitterList[i].spawnParticles(NUM_PARTICLES);
 	}
-	//emitterOne.spawnParticles(NUM_PARTICLES)}, 100);
-}, 25);
+}, 50);
 var update = function() {
     for (var i = 0; i < particleList.length; i++) {
         for ( var j  = 0; j < particleList[i].length; j++) {
@@ -171,12 +171,13 @@ Emitter.prototype.spawnParticles = function () {
 		return;
 	}
     var tempParticles = [];
-	for (var i = 0; i <= this.spread; i+= 0.075) {
+	for (var i = 0; i < this.spread; i+= 0.01 * Math.PI) {
 		var xVar = Math.random() * (Math.cos(i+1) - Math.cos(i) ) + Math.cos(i+1);
 		var yVar = Math.random() * (Math.sin(i+1) - Math.sin(i) ) + Math.sin(i+1);
 		var newParticle = new Particle(this.x + xVar, this.y + yVar);
 		newParticle.xv = (newParticle.xv*Math.cos(i));
 		newParticle.yv = (newParticle.yv*Math.sin(i));
+
 		tempParticles.push(newParticle);
 	}
     particleList.push(tempParticles);
