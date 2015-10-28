@@ -38,21 +38,12 @@ window.addEventListener("keyup", function(event)
 var particleList = [];
 var NUM_PARTICLES = 50;
 var COUNT_PARTICLES = 0;
-var MAX_PARTICLES = 2000;
-var emitterOne = new Emitter(300, 500, 0, 2);
+var MAX_PARTICLES = 10000;
+var emitterOne = new Emitter(600, 700, 0, 2);
 var emitterList = [];
 emitterList.push(emitterOne);
-var field1 = new GravityField(350, 500, -50);
 var fieldsList = []
-fieldsList.push(new GravityField(300, 500, 150));
-fieldsList.push(new GravityField(300, 550, -50));
-fieldsList.push(new GravityField(325, 475, -50));
-fieldsList.push(new GravityField(325, 525, -50));
-fieldsList.push(new GravityField(300, 450, -50));
-fieldsList.push(new GravityField(275, 475, -50));
-fieldsList.push(new GravityField(275, 525, -50));
-fieldsList.push(new GravityField(250, 500, -50));
-fieldsList.push(field1);
+fieldsList.push(new GravityField(600, 700, 550));
 setInterval(function() {
 	for (var i = 0; i < emitterList.length; i++) {
 		emitterList[i].spawnParticles(NUM_PARTICLES);
@@ -105,10 +96,10 @@ function Particle(x, y, r, color, endcolor, life, drift)
     this.x = x || 300;
     this.y = y || 300;
     this.r = r || .5;
-    this.xv = 1;
-    this.yv = 1;
+    this.xv = 5;
+    this.yv = 5;
     this.color = color || "#ffffff";
-	this.life = life || 10000000;
+	this.life = life || 1000;
 	this.age = 0;
 	//0 - 1 i  think
 	this.drift = drift || 0.00;
@@ -128,10 +119,10 @@ Particle.prototype.render = function()
 {
     context.beginPath();
     context.arc(this.x, this.y, this.r, 2 * Math.PI, false);
-	var transparency = ((this.life - this.age ) / this.life) - 0.25;
+	var transparency = ((this.life - this.age ) / this.life) - 0.205;
 	var strTransparency = transparency.toString();
 	
-    context.fillStyle = "rgba(255, 255, 255," + strTransparency+  " )"; 
+    context.fillStyle = "rgba(255, 0, 255," + strTransparency+  " )"; 
     context.fill();
 }
 
@@ -160,7 +151,7 @@ function Emitter(x, y, startspread, endspread, speed, thickness) {
     this.endspread = endspread  * Math.PI || Math.PI * 2;
 	console.log(this.spread);
     this.speed = speed || 1;
-	this.thickness = thickness || 0.01;
+	this.thickness = thickness || 0.005;
 }
 
 Emitter.prototype.update = function () {
@@ -222,7 +213,7 @@ GravityField.prototype.render = function() {
 		fillColor = "rgba(0, 0, 255, 0.5)";
 	}	
     context.beginPath();
-    context.arc(this.x, this.y, this.mass/500 + 1, 0, 2 * Math.PI, false);
+    context.arc(this.x, this.y, Math.abs(this.mass/500) + 1, 0, 2 * Math.PI, false);
     context.fillStyle = fillColor;
     context.fill();
 	context.closePath();
