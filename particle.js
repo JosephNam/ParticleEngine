@@ -1,28 +1,35 @@
 //Author: Joseph Nam
 //Interactive Musical Particle Generator
 
+//animation function call once at 60fps
 var animate = window.requestAnimationFrame ||
 window.webkitRequestAnimationFrame ||
 window.mozRequestAnimationFrame ||
 function(callback) {window.setTimeout(callback, 1000/60)};
 
 var canvas = document.createElement('canvas');
+
+//setting canvas size
 var CANVAS_WIDTH = 1200;
 var CANVAS_HEIGHT = 900;
 canvas.width = CANVAS_WIDTH;
 canvas.height = CANVAS_HEIGHT;
 var context = canvas.getContext('2d');
 
+//the recursive call for updating and rendering
 var step = function() {
     update();
     render();
     animate(step);
 }
 
+//start on load
 window.onload = function() {
     document.body.appendChild(canvas);
     animate(step);
 }
+
+//Deprecated
 var keysDown = {};
 
 window.addEventListener("keydown", function(event)
@@ -35,20 +42,25 @@ window.addEventListener("keyup", function(event)
     delete keysDown[event.keyCode];
 });
 
+
+//adding global fields for functions to access and manipulate
 var particleList = [];
 var NUM_PARTICLES = 50;
 var COUNT_PARTICLES = 0;
 var MAX_PARTICLES = 10000;
-var emitterOne = new Emitter(600, 700, 0, 2);
+var emitterOne = new Emitter(150, 275, 0, .15);
 var emitterList = [];
 emitterList.push(emitterOne);
 var fieldsList = []
-fieldsList.push(new GravityField(600, 700, 550));
+fieldsList.push(new GravityField(300, 300, 300));
+
 setInterval(function() {
 	for (var i = 0; i < emitterList.length; i++) {
 		emitterList[i].spawnParticles(NUM_PARTICLES);
 	}
 }, 25);
+
+//update function that is called in step
 var update = function() {
     for (var i = 0; i < particleList.length; i++) {
         for ( var j  = 0; j < particleList[i].length; j++) {
@@ -59,7 +71,7 @@ var update = function() {
 				COUNT_PARTICLES--;
 				//else check if off screen to delete
 			} else {
-			
+				//if off screen delete	
 				if(particleList[i][j].x > CANVAS_WIDTH || particleList[i][j].y > CANVAS_HEIGHT || particleList[i][j].x < 0 || particleList[i][j].y < 0) {
 					particleList[i].splice(j, 1);
 					COUNT_PARTICLES--;
@@ -67,6 +79,7 @@ var update = function() {
 				
 			}
         }
+		//if one particle list is empty remove
         if (particleList[i].length == 0) {
             particleList.splice(i, 1);
             console.log("removed empty array");
@@ -74,23 +87,25 @@ var update = function() {
     }
 }
 
+//renders the background black and renders emitters fields and particles
 var render = function() {
     context.fillStyle = "#000000";
     context.fillRect(0,0,CANVAS_WIDTH,CANVAS_HEIGHT);
+    for (var i = 0; i < particleList.length; i++) {
+        for ( var j  = 0; j < particleList[i].length; j++) {
+            particleList[i][j].render();
+        }
+    }
 	for (var i = 0; i < emitterList.length; i++) {
 		emitterList[i].render();
 	}
 	for (var i = 0; i < fieldsList.length; i++) {
 		fieldsList[i].render();
 	}
-    for (var i = 0; i < particleList.length; i++) {
-        for ( var j  = 0; j < particleList[i].length; j++) {
-            particleList[i][j].render();
-        }
-    }
 }
 
 
+//todo  - - - - implement color shift to endcolor by end of life
 function Particle(x, y, r, color, endcolor, life, drift)
 {
     this.x = x || 300;
@@ -99,7 +114,7 @@ function Particle(x, y, r, color, endcolor, life, drift)
     this.xv = 5;
     this.yv = 5;
     this.color = color || "#ffffff";
-	this.life = life || 1000;
+	this.life = life || 100000;
 	this.age = 0;
 	//0 - 1 i  think
 	this.drift = drift || 0.00;
@@ -119,7 +134,7 @@ Particle.prototype.render = function()
 {
     context.beginPath();
     context.arc(this.x, this.y, this.r, 2 * Math.PI, false);
-	var transparency = ((this.life - this.age ) / this.life) - 0.205;
+	var transparency = ((this.life - this.age ) / this.life) - 0.05;
 	var strTransparency = transparency.toString();
 	
     context.fillStyle = "rgba(255, 0, 255," + strTransparency+  " )"; 
